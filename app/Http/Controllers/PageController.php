@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Http\Requests;
-
+use App\Page;
+use Illuminate\Support\Facades\DB;
 class PageController extends Controller
 {
     public function __construct()
@@ -15,20 +16,25 @@ class PageController extends Controller
 
     public function getIndex(Request $request)
     {
-//        $request->session()->flush();
-        $request->session()->push('usernames',$request->input('name'));
-
-        $parame = $request->all();
-        echo "<pre>";
-        print_r($parame);
+        $parameters = $request->all();
+        $title = array_get($parameters,'title');
+        $id = array_get($parameters,'id');
+        $query = DB::table('pages');
+        if($title){
+            $query->where('title','like','%'.$title.'%');
+        }
+        if($id){
+            $query->where('id',$id);
+        }
+        $pages = $query->paginate(2);
+        return view('page.index')->withPages($pages)->withParameters($parameters);
     }
     public function getShow(Request $request)
     {
-        $parames = $request->old();
-        echo '<pre>';
-        echo session('username1','lipeng');
-       $usernames = $request->session()->get('usernames');
-        var_dump($usernames);
+        $page = DB::table('pages')->lists('title');
+        var_dump($page);
+        $page1 = DB::table('pages')->lists('title','content');
+        var_dump($page1);
 
     }
 }
